@@ -85,6 +85,7 @@ const checkFileStatus = () => {
 const setup = async () => {
     await checkFileStatus()
     const jobs = getJobs()
+    const runningJobs = []
 
     const statusJob = {
         cron: '* * * * * *',
@@ -92,10 +93,12 @@ const setup = async () => {
     }
 
     if (!jobs.find(j => j.url === statusJob.url)) {
-        addJob(statusJob)
-    }
-
-    const runningJobs = []
+        runningJobs.push({
+            ...statusJob,
+            id: runningJobs.length + 1
+        })
+        runJob(statusJob)
+    } 
 
     for (const job of jobs) {
         runningJobs.push({
@@ -104,7 +107,7 @@ const setup = async () => {
         })
         runJob(job)
     }
-    
+
     fs.writeFileSync(jobsFile, JSON.stringify(runningJobs))
 }
 

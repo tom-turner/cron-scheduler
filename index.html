@@ -97,7 +97,7 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                loadJobs();
+                window.location.reload();
             })
             .catch(error => {
                 console.error(error);
@@ -164,7 +164,7 @@
                 cronInput.value = '';
                 urlInput.value = '';
                 secretInput.value = '';
-                loadJobs();
+                window.location.reload();
             })
             .catch(error => {
                 console.error(error);
