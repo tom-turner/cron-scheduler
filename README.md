@@ -23,7 +23,7 @@ After executing the above steps, Cron Scheduler will be up and running, and PM2 
 
 ## Usage
 
-Once Cron Scheduler is running, you can access it at localhost:3000
+Once Cron Scheduler is running, you can access it at your local port
 
 ## Troubleshooting
 
