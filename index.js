@@ -52,7 +52,8 @@ const addJob = (job) => {
 
 const deleteJob = (job) => {
     const jobs = getJobs()
-    const newJobs = jobs.filter(j => j.id !== job.id)
+    const newJobs = jobs.filter(j => j.id !== parseInt(job.id))
+    console.log(newJobs)
     fs.writeFileSync(jobsFile, JSON.stringify(newJobs))
     // end process to let pm2 restart
     process.exit(0) // just exit and let pm2 restart
