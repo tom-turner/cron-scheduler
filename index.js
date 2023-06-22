@@ -102,20 +102,31 @@ const setup = async () => {
     }
 }
 
+const checkAPISecret = (req) => {
+    const secret = req.headers.authorization
+    if (secret !== process.env.PASSWORD) {
+        return false
+    }
+    return true
+}
+
 setup().then(() => {
     const server = http.createServer((req, res) => {
+        const session = req.headers.authorization === process.env.PASSWORD
+        console.log(session)
         if (req.url === '/api/status') {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json'); // Updated header method
             return res.end(JSON.stringify({ status: 'ok' })); // Stringify the JSON object
         }
+        console.log(session, req.headers.authorization, process.env.PASSWORD) 
 
-        if (req.url === '/api/get-jobs') {
+        if (session && req.url === '/api/get-jobs') {   
             res.setHeader('Content-Type', 'application/json'); // Updated header method
             return res.end(JSON.stringify(getJobs())); // Stringify the JSON object
         }
 
-        if (req.url === '/api/add-job') {
+        if (session && req.url === '/api/add-job') {
             res.setHeader('Content-Type', 'application/json'); // Updated header method
             const body = [];
             req.on('data', (chunk) => {
@@ -127,7 +138,7 @@ setup().then(() => {
             });
         }
 
-        if (req.url === '/api/delete-job') {
+        if (session && req.url === '/api/delete-job') {
             res.setHeader('Content-Type', 'application/json'); // Updated header method
             const body = [];
             req.on('data', (chunk) => {

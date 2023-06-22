@@ -73,11 +73,24 @@
         </tr>
     </table>
     <script>
+
+        const password = localStorage.getItem('password');
+        if(!password) {
+            const secret = prompt('Enter API Secret');
+            localStorage.setItem('password', secret);
+            window.location.reload();
+        } 
+        if(password === 'null') {
+            localStorage.removeItem('password');
+            window.location.reload();
+        }
+
         function deleteJob(jobId) {
             fetch('/api/delete-job', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': password
                 },
                 body: JSON.stringify({ id: jobId })
             })
@@ -92,7 +105,11 @@
         }
 
         function loadJobs() {
-            fetch('/api/get-jobs')
+            fetch('/api/get-jobs', {
+                headers: {
+                    'Authorization': password
+                }
+            })
             .then(response => response.json())
             .then(data => {
                 const jobsTable = document.getElementById('jobs-table');
@@ -136,7 +153,8 @@
             fetch('/api/add-job', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': password
                 },
                 body: JSON.stringify({ cron, url, secret })
             })
