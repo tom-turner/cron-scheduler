@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cron Jobs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .add-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cron Jobs</h1>
+    <form id="add-form" method="POST" action="/api/add-job" style="margin-bottom: 20px;">
+        <div style="margin-bottom: 10px;">
+            <label for="cron-input" style="width: 150px; display: inline-block;">Cron Expression:</label>
+            <input type="text" id="cron-input" name="cron" style="width: 200px;" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="url-input" style="width: 150px; display: inline-block;">URL:</label>
+            <input type="text" id="url-input" name="url" style="width: 200px;" required>
+        </div>
+        <div>
+            <input type="submit" class="add-button" value="Add Job" style="margin: 'auto';">
+        </div>
+    </form>
+    <table id="jobs-table">
+        <tr>
+            <th>ID</th>
+            <th>Cron Expression</th>
+            <th>URL</th>
+            <th></th>
+        </tr>
+    </table>
+    <script>
+        function deleteJob(jobId) {
+            fetch('/api/delete-job', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: jobId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                loadJobs();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+            location.reload();
+        }
+
+        function loadJobs() {
+            fetch('/api/get-jobs')
+            .then(response => response.json())
+            .then(data => {
+                const jobsTable = document.getElementById('jobs-table');
+                jobsTable.innerHTML = `
+                    <tr>
+                        <th>ID</th>
+                        <th>Cron Expression</th>
+                        <th>URL</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                `;
+                data.forEach(job => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${job.id}</td>
+                        <td>${job.cron}</td>
+                        <td>${job.url}</td>
+                        <td>${job.status}</td>
+                        <td>
+                            <button class="delete-button" onclick="deleteJob('${job.id}')">Delete</button>
+                        </td>
+                    `;
+                    jobsTable.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+
+        document.getElementById('add-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const cronInput = document.getElementById('cron-input');
+            const urlInput = document.getElementById('url-input');
+            const cron = cronInput.value;
+            const url = urlInput.value;
+
+            fetch('/api/add-job', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cron, url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                cronInput.value = '';
+                urlInput.value = '';
+                loadJobs();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+
+        loadJobs();
+    </script>
+</body>
+</html>
