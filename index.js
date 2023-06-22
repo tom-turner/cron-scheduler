@@ -46,10 +46,9 @@ const runJob = (job) => {
 
 const addJob = (job) => {
     const jobs = getJobs()
-    console.log(job)
-    const id = jobs.length + 1
+
     jobs.push({
-        id,
+        id: jobs.length + 1,
         ...job
     })
 
@@ -60,7 +59,6 @@ const addJob = (job) => {
 const deleteJob = (job) => {
     const jobs = getJobs()
     const newJobs = jobs.filter(j => j.id !== parseInt(job.id))
-    console.log(newJobs)
     fs.writeFileSync(jobsFile, JSON.stringify(newJobs))
     // end process to let pm2 restart
     process.exit(0) // just exit and let pm2 restart
@@ -97,9 +95,17 @@ const setup = async () => {
         addJob(statusJob)
     }
 
+    const runningJobs = []
+
     for (const job of jobs) {
+        runningJobs.push({
+            ...job,
+            id: runningJobs.length + 1
+        })
         runJob(job)
     }
+    
+    fs.writeFileSync(jobsFile, JSON.stringify(runningJobs))
 }
 
 const checkAPISecret = (req) => {
@@ -113,13 +119,12 @@ const checkAPISecret = (req) => {
 setup().then(() => {
     const server = http.createServer((req, res) => {
         const session = req.headers.authorization === process.env.PASSWORD
-        console.log(session)
+
         if (req.url === '/api/status') {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json'); // Updated header method
             return res.end(JSON.stringify({ status: 'ok' })); // Stringify the JSON object
         }
-        console.log(session, req.headers.authorization, process.env.PASSWORD) 
 
         if (session && req.url === '/api/get-jobs') {   
             res.setHeader('Content-Type', 'application/json'); // Updated header method

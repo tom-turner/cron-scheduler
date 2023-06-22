@@ -6,14 +6,15 @@ Cron Scheduler is a simple cron scheduling app that allows you to schedule and a
 
 To get started with Cron Scheduler, follow the steps below:
 
-1. Install PM2 globally by running the following command:
+1. Add your PASSWORD and running PORT to the .env, follow .example.env for info.
+
+2. Install PM2 globally by running the following command:
 `npm install -g pm2`
 
-
-2. Install the dependencies by navigating to the root directory of the Cron Scheduler app and running the command:
+3. Install the dependencies by navigating to the root directory of the Cron Scheduler app and running the command:
 npm ci
 
-3. Start Cron Scheduler with PM2 and save it to boot using the following commands in the root directory of the app:
+4. Start Cron Scheduler with PM2 and save it to boot using the following commands in the root directory of the app:
 `pm2 start index.js --name cron-scheduler`
 `pm2 startup`
 `pm2 save`
