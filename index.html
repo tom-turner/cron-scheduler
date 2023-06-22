@@ -56,6 +56,10 @@
             <label for="url-input" style="width: 150px; display: inline-block;">URL:</label>
             <input type="text" id="url-input" name="url" style="width: 200px;" required>
         </div>
+        <div style="margin-bottom: 10px;">
+            <label for="secret-input" style="width: 150px; display: inline-block;">Secret:</label>
+            <input type="text" id="secret-input" name="secret" style="width: 200px;">
+        </div>
         <div>
             <input type="submit" class="add-button" value="Add Job" style="margin: 'auto';">
         </div>
@@ -85,7 +89,6 @@
             .catch(error => {
                 console.error(error);
             });
-            location.reload();
         }
 
         function loadJobs() {
@@ -125,21 +128,24 @@
             event.preventDefault();
             const cronInput = document.getElementById('cron-input');
             const urlInput = document.getElementById('url-input');
+            const secretInput = document.getElementById('secret-input');
             const cron = cronInput.value;
             const url = urlInput.value;
+            const secret = secretInput.value;
 
             fetch('/api/add-job', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ cron, url })
+                body: JSON.stringify({ cron, url, secret })
             })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 cronInput.value = '';
                 urlInput.value = '';
+                secretInput.value = '';
                 loadJobs();
             })
             .catch(error => {

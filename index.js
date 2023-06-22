@@ -26,9 +26,16 @@ const runJob = (job) => {
     return new CronJob(job.cron, () => {
         console.log('fetching ' + job.url)
         try {
-            fetch(job.url).then(res => {
+            fetch(job.url, {
+                headers: {
+                    "Authorization": job.secret || '',
+                },
+            }).then(res => {
                 console.log('status ' + res.status)
                 updateJobStatus(job, res.status.toString())
+            }).catch(err => {
+                console.log(err)
+                updateJobStatus(job, 'error')
             })
         } catch (err) {
             console.log(err)
@@ -39,7 +46,7 @@ const runJob = (job) => {
 
 const addJob = (job) => {
     const jobs = getJobs()
-
+    console.log(job)
     const id = jobs.length + 1
     jobs.push({
         id,
