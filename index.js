@@ -22,27 +22,32 @@ const updateJobStatus = (job, status) => {
     fs.writeFileSync(jobsFile, JSON.stringify(newJobs))
 }
 
-const runJob = (job) => {
-    return new CronJob(job.cron, () => {
-        console.log('fetching ' + job.url)
-        try {
-            fetch(job.url, {
-                headers: {
-                    "Authorization": job.secret || '',
-                },
-            }).then(res => {
-                console.log('status ' + res.status)
-                updateJobStatus(job, res.status.toString())
-            }).catch(err => {
-                console.log(err)
-                updateJobStatus(job, 'error')
-            })
-        } catch (err) {
+const runNow = (job) => {
+    console.log('fetching ' + job.url)
+    try {
+        fetch(job.url, {
+            headers: {
+                "Authorization": job.secret || '',
+            },
+        }).then(res => {
+            console.log('status ' + res.status)
+            updateJobStatus(job, res.status.toString())
+        }).catch(err => {
             console.log(err)
             updateJobStatus(job, 'error')
-        }
+        })
+    } catch (err) {
+        console.log(err)
+        updateJobStatus(job, 'error')
+    }
+}
+
+const runJob = (job) => {
+    return new CronJob(job.cron, () => {
+        runNow(job)
     }, null, true, 'GMT')
 }
+    
 
 const addJob = (job) => {
     const jobs = getJobs()
@@ -142,6 +147,21 @@ setup().then(() => {
             }).on('end', () => {
                 const data = JSON.parse(Buffer.concat(body).toString());
                 addJob(data)
+                return res.end(JSON.stringify({ status: 'ok' })); // Stringify the JSON object
+            });
+        }
+
+        if(session && req.url === '/api/run-now') {
+            res.setHeader('Content-Type', 'application/json'); // Updated header method
+            const body = [];
+            req.on('data', (chunk) => {
+                body.push(chunk);
+            }).on('end', () => {
+                const data = JSON.parse(Buffer.concat(body).toString());
+                const id = data.id
+                const jobs = getJobs()
+                const job = jobs.find(j => j.id === parseInt(id))
+                runNow(job)
                 return res.end(JSON.stringify({ status: 'ok' })); // Stringify the JSON object
             });
         }

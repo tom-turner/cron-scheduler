@@ -97,10 +97,32 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                alert('Job deleted')
                 window.location.reload();
             })
             .catch(error => {
                 console.error(error);
+                alert('Error deleting job, see console for details')
+            });
+        }
+
+        function runNow(jobId) {
+            fetch('/api/run-now', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': password
+                },
+                body: JSON.stringify({ id: jobId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Job started');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error starting job, see console for details')
             });
         }
 
@@ -120,6 +142,7 @@
                         <th>URL</th>
                         <th>Status</th>
                         <th></th>
+                        <th></th>
                     </tr>
                 `;
                 data.forEach(job => {
@@ -129,6 +152,9 @@
                         <td>${job.cron}</td>
                         <td>${job.url}</td>
                         <td>${job.status}</td>
+                        <td>
+                            <button class="run-button" onclick="runNow('${job.id}')">Run Now</button>
+                        </td>
                         <td>
                             <button class="delete-button" onclick="deleteJob('${job.id}')">Delete</button>
                         </td>
@@ -164,10 +190,12 @@
                 cronInput.value = '';
                 urlInput.value = '';
                 secretInput.value = '';
+                alert('Job added')
                 window.location.reload();
             })
             .catch(error => {
                 console.error(error);
+                alert('Error adding job, see console for details')
             });
         });
 
